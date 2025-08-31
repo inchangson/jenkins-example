@@ -13,7 +13,6 @@ pipeline {
             steps {
                 script {
                     def continueChoice = input(
-                        id: 'ContinueChoice',
                         message: '다음 단계로 진행하시겠습니까?',
                         parameters: [
                             choice(
@@ -34,35 +33,28 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Select Machine') {
             steps {
                 script {
                     echo '=== 사용자 입력: 배포할 머신 선택 ==='
                     
-                    def machineChoice = input(
-                        id: 'MachineChoice',
+                    // 머신 선택 input 스텝
+                    def machineName = input(
                         message: '배포할 머신을 선택하세요',
                         parameters: [
                             choice(
                                 name: 'MACHINE_NAME',
                                 choices: ['machine-01', 'machine-02'],
                                 description: '머신을 선택하세요'
-                            ),
-                            string(
-                                name: 'DEPLOY_COMMENT',
-                                defaultValue: '배포 코멘트',
-                                description: '배포에 대한 코멘트를 입력하세요'
                             )
                         ]
                     )
                     
-                    echo "선택된 머신: ${machineChoice.MACHINE_NAME}"
-                    echo "배포 코멘트: ${machineChoice.DEPLOY_COMMENT}"
+                    echo "선택된 머신: ${machineName}"
                     
                     // 선택된 머신 정보로 txt 파일 생성
-                    sh "echo 'Machine: ${machineChoice.MACHINE_NAME}' > selected_machine.txt"
-                    sh "echo 'Comment: ${machineChoice.DEPLOY_COMMENT}' >> selected_machine.txt"
+                    sh "echo 'Machine: ${machineName}' > selected_machine.txt"
                     sh "echo 'Time: ${new Date().format('yyyy-MM-dd HH:mm:ss')}' >> selected_machine.txt"
                     
                     echo "머신 정보가 selected_machine.txt 파일에 저장되었습니다."
