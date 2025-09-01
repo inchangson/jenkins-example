@@ -1,3 +1,12 @@
+def allServers = [
+        [name: "vm-az01-prd-navupd-was-01", port: 111, host: "10.111.11.111", appPath: "TEST11", user: "tomcat", password: ""],
+        [name: "vm-az01-prd-navupd-was-02", port: 222, host: "10.222.22.222", appPath: "TEST21", user: "tomcat", password: ""]
+]
+
+// TARGET_VM 파라미터에 따라 선택된 서버만 필터링
+def servers = allServers.findAll { it.name.contains(params.TARGET_VM) }
+
+
 pipeline {
     agent any
     
@@ -6,6 +15,22 @@ pipeline {
             steps {
                 echo '=== 파이프라인 시작 ==='
                 echo '현재 시간: ' + new Date().format('yyyy-MM-dd HH:mm:ss')
+            }
+        }
+
+        stage('Print Deployment Target') {
+            steps {
+                script {
+                    echo "=== 배포 대상 서버 선택 ==="
+                    echo "선택된 TARGET_VM: ${params.TARGET_VM}"
+                    servers.each { server ->
+                        echo "배포 대상 서버: ${server.name} (${server.host}:${server.port}) - ${server.appPath}"
+                    }
+
+                    if (servers.isEmpty()) {
+                        error "TARGET_VM 파라미터와 일치하는 이름의 서버가 없습니다."
+                    }
+                }
             }
         }
 
