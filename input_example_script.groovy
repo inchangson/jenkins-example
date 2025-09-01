@@ -25,6 +25,9 @@ pipeline {
                     
                     echo "사용자 선택: ${continueChoice}"
                     
+                    // 환경변수로 저장하여 다른 스테이지에서 사용 가능하도록 함
+                    env.CONTINUE_CHOICE = continueChoice
+                    
                     if (continueChoice == 'STOP') {
                         error "사용자가 파이프라인을 중단했습니다."
                     }
@@ -53,11 +56,57 @@ pipeline {
                     
                     echo "선택된 머신: ${machineName}"
                     
+                    // 환경변수로 저장하여 다른 스테이지에서 사용 가능하도록 함
+                    env.MACHINE_NAME = machineName
+                    
                     // 선택된 머신 정보로 txt 파일 생성
                     sh "echo 'Machine: ${machineName}' > selected_machine.txt"
                     sh "echo 'Time: ${new Date().format('yyyy-MM-dd HH:mm:ss')}' >> selected_machine.txt"
                     
                     echo "머신 정보가 selected_machine.txt 파일에 저장되었습니다."
+                }
+            }
+        }
+        
+        stage('Variable Scope Test') {
+            steps {
+                script {
+                    echo '=== 변수 스코프 테스트 ==='
+                    echo '이전 스테이지에서 입력받은 값들을 확인합니다.'
+                    
+                    // 이전 스테이지의 변수들이 접근 가능한지 테스트
+                    try {
+                        echo "continueChoice 변수 접근 시도..."
+                        echo "continueChoice: ${continueChoice}"
+                    } catch (Exception e) {
+                        echo "continueChoice 변수에 접근할 수 없습니다: ${e.message}"
+                    }
+                    
+                    try {
+                        echo "machineName 변수 접근 시도..."
+                        echo "machineName: ${machineName}"
+                    } catch (Exception e) {
+                        echo "machineName 변수에 접근할 수 없습니다: ${e.message}"
+                    }
+                    
+                    // 환경변수로 저장된 값 확인
+                    echo "=== 환경변수로 저장된 값들 ==="
+                    echo "env.CONTINUE_CHOICE: ${env.CONTINUE_CHOICE}"
+                    echo "env.MACHINE_NAME: ${env.MACHINE_NAME}"
+                    
+                    // 환경변수를 사용한 추가 작업
+                    if (env.CONTINUE_CHOICE == 'CONTINUE') {
+                        echo "✅ 사용자가 계속 진행을 선택했습니다."
+                    } else {
+                        echo "❌ 사용자가 파이프라인을 중단했습니다."
+                    }
+                    
+                    if (env.MACHINE_NAME) {
+                        echo "✅ 선택된 머신: ${env.MACHINE_NAME}"
+                        // 환경변수를 사용한 파일 생성
+                        sh "echo 'Final Machine: ${env.MACHINE_NAME}' > final_machine.txt"
+                        sh "echo 'Continue Choice: ${env.CONTINUE_CHOICE}' >> final_machine.txt"
+                    }
                 }
             }
         }
