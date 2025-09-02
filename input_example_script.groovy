@@ -1,10 +1,10 @@
 def allServers = [
-        [name: "vm-az01-prd-navupd-was-01", port: 111, host: "10.111.11.111", appPath: "TEST11", user: "tomcat", password: ""],
-        [name: "vm-az01-prd-navupd-was-02", port: 222, host: "10.222.22.222", appPath: "TEST21", user: "tomcat", password: ""]
+        [id: "was-01", name: "vm-az01-prd-navupd-was-01", port: 111, host: "10.111.11.111", appPath: "TEST11", user: "tomcat", password: ""],
+        [id: "was-02", name: "vm-az01-prd-navupd-was-02", port: 222, host: "10.222.22.222", appPath: "TEST21", user: "tomcat", password: ""]
 ]
 
 // TARGET_VM 파라미터에 따라 선택된 서버만 필터링
-def servers = allServers.findAll { it.name.contains(params.TARGET_VM) }
+def servers = allServers.findAll { it.id == params.TARGET_VM }
 
 
 pipeline {
